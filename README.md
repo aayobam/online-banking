@@ -1,2 +1,3 @@
 # online-banking
-An online banking build with python and django framework.
+An online banking api built with python and django rest framework.
+- Coming Soon.
