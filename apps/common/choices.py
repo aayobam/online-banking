@@ -21,8 +21,6 @@ ROLE_CHOICE = (
 TRANSACTION_TYPES_CHOICE = (
     ("deposit", "Deposit"),
     ("withdrawal", "Withdrawal"),
-    ("transfer", "Transfer"),
-    ("loan", "Loan")
 )
 
 BANK_VERIFICATION_STATUS = (

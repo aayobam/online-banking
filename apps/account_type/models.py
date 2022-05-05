@@ -1,17 +1,15 @@
 from uuid import uuid4
 from django.db import models
 from django.urls import reverse
+from apps.common.models import TimeStampedModel
 from django.core.validators import MinValueValidator
 
 
 
-class AccountType(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+class AccountType(TimeStampedModel):
     name = models.CharField(max_length=100)
     account_limit = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)])
     maximum_daily_withdrawal_amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)])
-    date_created = models.DateTimeField(auto_now_add=True)
-    date_updated = models.DateTimeField(auto_now=True)
     
     class Meta:
         verbose_name = "account type"

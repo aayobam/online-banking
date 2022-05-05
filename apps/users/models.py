@@ -5,11 +5,11 @@ from django.urls import reverse
 from apps.users.managers import CustomUserManager
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinLengthValidator
+from apps.common.models import TimeStampedModel
 
 
 
-class CustomUser(AbstractUser):
-    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+class CustomUser(AbstractUser, TimeStampedModel):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(max_length=100, unique=True)
@@ -23,8 +23,6 @@ class CustomUser(AbstractUser):
     zipcode = models.CharField(null=True, max_length=7, validators=[MinLengthValidator(5)])
     country = models.CharField(default="nigeria", choices=choices.COUNTRY_CHOICE, max_length=100)
     profile_picture = models.ImageField(upload_to="profile_images", blank=True)
-    date_created = models.DateTimeField(auto_now_add=True)
-    date_updated = models.DateTimeField(auto_now=True)
 
     objects = CustomUserManager()
     USERNAME_FIELD = 'email'

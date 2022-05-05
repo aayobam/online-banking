@@ -22,20 +22,3 @@ def file_validation(value):
 
     if value.size > FILE_UPLOAD_MAX_MEMORY_SIZE:
         raise ValidationError("File shouldn't be larger than 10MB.")
-
-
-def generate_account_number():
-    account_number = random.randint(0000000000, 9999999999)
-    return account_number
-
-
-def account_no_validator(value):
-    BankAccount = models.BankAccount.objects.all()
-    for value in BankAccount:
-        if value.verification_status == "Pending" or value.verification_status == "Failed":
-            value.account_no = 1234567890
-
-        if value.verification_status == "Success":
-            value.account_no = generate_account_number
-        value.save()
-        return value
