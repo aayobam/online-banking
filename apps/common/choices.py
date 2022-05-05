@@ -13,8 +13,8 @@ SEX_CHOICE = (
 ROLE_CHOICE = (
     ("customer", "Customer"),
     ("admin", "Admin"),
-    ("account_office", "Account_Officer"),
-    ("bank_manager", "Bank_Manager"),
+    ("account_office", "Account Officer"),
+    ("bank_manager", "Bank Manager"),
     ("teller", "Teller"),
 )
 
