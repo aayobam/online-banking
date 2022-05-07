@@ -31,11 +31,11 @@ class CustomUser(AbstractUser, TimeStampedModel):
 
     class Meta:
         ordering = ("-date_created",)
-        verbose_name = "user"
-        verbose_name_plural = "users"
+        verbose_name = "User"
+        verbose_name_plural = "Users"
 
     def __str__(self):
         return self.get_full_name()
 
     def get_absolute_url(self):
-       return reverse("user-detail", kwargs={"user_id": self.id})
+       return reverse("user_detail", kwargs={"user_id": self.id})

@@ -14,7 +14,7 @@ from apps.users.views import (
 
 @pytest.mark.django_db
 def test_create_user_url_is_resolved():
-    url = reverse("register")
+    url = reverse("create_user")
     assert resolve(url).func.view_class == RegisterUserApiView
 
 

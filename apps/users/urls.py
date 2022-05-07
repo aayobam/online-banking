@@ -13,7 +13,7 @@ from .views import (
 urlpatterns = [
     path('auth/', CustomTokenObtainPairView.as_view(), name="access_token"),
     path('token/refresh/', TokenRefreshView.as_view(), name="token_refresh"),
-    path('register/', RegisterUserApiView.as_view(), name="register"),
+    path('register/', RegisterUserApiView.as_view(), name="create_user"),
     path('all/', UserListApiView.as_view(), name="user_list"),
     path('detail/<uuid:user_id>/', UserDetailApiView.as_view(), name="user_detail"),
     path('update/<uuid:user_id>/', UserUpdateApiView.as_view(), name="update_user"),

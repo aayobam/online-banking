@@ -15,6 +15,6 @@ class AccountTypeSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         for (key, value) in validated_data.items():
-            setattr(key, value, instance)
+            setattr(instance, key, value)
         instance.save()
         return instance

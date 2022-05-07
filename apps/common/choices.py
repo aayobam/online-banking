@@ -7,7 +7,7 @@ COUNTRY_CHOICE = (
 
 SEX_CHOICE = (
     ("male", "Male"),
-    ("female", "Femail")
+    ("female", "Female")
 )
 
 ROLE_CHOICE = (

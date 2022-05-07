@@ -1,3 +1,4 @@
+from urllib import response
 from apps.users.models import CustomUser
 from rest_framework.response import Response
 from apps.common import permission
@@ -10,7 +11,6 @@ from apps.users.serializers import (
 )
 
 
-
 class RegisterUserApiView(generics.CreateAPIView):
     """
     Register new users
@@ -21,17 +21,19 @@ class RegisterUserApiView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         payload = request.data.copy()
+        email = payload.get("email", None)
+        username = payload.get("username", None)
 
-        if CustomUser.objects.filter(email=payload["email"]).exists():
+        if CustomUser.objects.filter(email=email).exists():
             raise serializers.ValidationError("This email already exist in our database.")
         
-        if CustomUser.objects.filter(username=payload["username"]).exists():
+        if CustomUser.objects.filter(username=username).exists():
             raise serializers.ValidationError("This username already exist in our database.")
 
-        response = self.serializer_class(data=payload)
-        response.is_valid(raise_exception=True)
-        response.save()
-        return Response(response.data, status=status.HTTP_201_CREATED)
+        serializer = self.serializer_class(data=payload)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role="Customer")
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

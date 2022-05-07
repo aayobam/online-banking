@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
         return obj.get_absolute_url()
         
     def create(self, validated_data):
-        user = CustomUser.objects.create(**validated_data)
+        user = CustomUser.objects.create_user(**validated_data)
         return user
 
 
@@ -35,20 +35,20 @@ class UserRegisterationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ["email", "username", "first_name", "last_name", "password", "phone_no", "country", "detail_url"]
-        extra_kwargrs = {'password': {"write_only": True}}
+        fields = ["id", "email", "username", "first_name", "last_name", "password", "phone_no", "country", "detail_url"]
+        extra_kwargs = {'password': {"write_only": True}}
 
     def create(self, validated_data):
-        password = validated_data.get("password")
-        user = CustomUser.objects.create(**validated_data)
-        user.set_password(password)
-        user.role = "Customer"
-        user.save()
+        user = CustomUser.objects.create_user(**validated_data)
         return user
     
     def update(self, instance, validated_data):
+        password = validated_data.pop("password", None)
         for (key, value) in validated_data.items():
             setattr(key, value, instance)
+        
+        if password is None:
+            instance.set_password(password)
         instance.save()
         return instance
 
