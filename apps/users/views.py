@@ -1,7 +1,7 @@
-from urllib import response
 from apps.users.models import CustomUser
 from rest_framework.response import Response
-from apps.common import permission
+from apps.common import permission, custom_validator
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status, serializers, permissions
 from apps.users.serializers import (
@@ -23,6 +23,7 @@ class RegisterUserApiView(generics.CreateAPIView):
         payload = request.data.copy()
         email = payload.get("email", None)
         username = payload.get("username", None)
+        birth_date = payload.get("birth_date", None)
 
         if CustomUser.objects.filter(email=email).exists():
             raise serializers.ValidationError("This email already exist in our database.")
@@ -30,9 +31,16 @@ class RegisterUserApiView(generics.CreateAPIView):
         if CustomUser.objects.filter(username=username).exists():
             raise serializers.ValidationError("This username already exist in our database.")
 
+        age = custom_validator.verify_date_of_birth(value=birth_date)
+
+        if age < 18:
+            raise ValidationError(f"you are {age} years of age. you must be 18 years of age and above to own an account.")
+
+        print("CUSTOMERS'S AGE = ", age)
+
         serializer = self.serializer_class(data=payload)
         serializer.is_valid(raise_exception=True)
-        serializer.save(role="Customer")
+        serializer.save(role="Customer", age=age)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -69,7 +77,7 @@ class UserDetailApiView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     lookup_url_kwarg = "user_id"
     lookup_field = "id"
-    permission_classes = [permission.IsOwnerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated,permission.IsOwnerOrReadOnly]
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)

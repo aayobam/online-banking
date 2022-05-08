@@ -18,6 +18,8 @@ class CustomUserAdmin(UserAdmin):
                     "email",
                     "username",
                     "phone_no",
+                    "birth_date",
+                    "age",
                     "password1",
                     "password2",
                     "role",
@@ -51,6 +53,8 @@ class CustomUserAdmin(UserAdmin):
                     "email",
                     "username",
                     "phone_no",
+                    "birth_date",
+                    "age",
                     "role",
                     "address",
                     "city",
@@ -71,5 +75,5 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
     
-    list_display = ("id", "first_name", "last_name", "email", "username", "is_active", "is_superuser")
-    readonly_fields = ("id", "date_joined", "date_created", "date_updated")
+    list_display = ("id", 'username', 'email', 'first_name', 'last_name', 'birth_date', 'age',  'is_active', 'is_superuser')
+    readonly_fields = ("id", 'date_joined', 'date_created', 'date_updated')
