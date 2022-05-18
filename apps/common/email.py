@@ -15,8 +15,9 @@ class EmailNotification:
             message=self.message,
             from_email=self.sender_email,
             recipient_list=[str(self.receiver_email)],
-            fail_silently= True
+            fail_silently=True
         )
+        return True
 
     def transaction_email(self):
         send_mail(
@@ -26,3 +27,4 @@ class EmailNotification:
             recipient_list=[str(self.receiver_email)],
             fail_silently=True
         )
+        return True

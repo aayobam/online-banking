@@ -24,7 +24,7 @@ TRANSACTION_TYPES_CHOICE = (
 )
 
 BANK_VERIFICATION_STATUS = (
+    ("pending", "Pending"),
+    ("success", "Success"),
     ("failed", "Failed"),
-    ("success", "Success"), 
-    ("pending", "Pending")
 )

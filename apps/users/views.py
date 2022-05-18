@@ -7,7 +7,9 @@ from rest_framework import generics, status, serializers, permissions
 from apps.users.serializers import (
     UserSerializer,
     UserRegisterationSerializer,
+    RequestPasswordResetSerializer,
     CustomTokenObtainPairSerializer
+    
 )
 
 
@@ -35,8 +37,6 @@ class RegisterUserApiView(generics.CreateAPIView):
 
         if age < 18:
             raise ValidationError(f"you are {age} years of age. you must be 18 years of age and above to own an account.")
-
-        print("CUSTOMERS'S AGE = ", age)
 
         serializer = self.serializer_class(data=payload)
         serializer.is_valid(raise_exception=True)
@@ -114,3 +114,11 @@ class UserDeleteApiView(generics.RetrieveDestroyAPIView):
     lookup_url_kwarg = "user_id"
     lookup_field = "id"
     permission_classes = [permission.IsSuperUser]
+
+
+class RequestPasswordResetApiView(generics.GenericAPIView):
+    serializer_class = RequestPasswordResetSerializer
+    def post(self, request):
+        payload = {"request": request, "data": request.data.copy()}
+        serializer = self.serializer_class(data=payload)
+        serializer.is_valid(raise_exception=True)
