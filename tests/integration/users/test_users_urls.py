@@ -1,15 +1,15 @@
 import pytest
 from django.urls import resolve
 from rest_framework.reverse import reverse
-from apps.users.views import (
-    RegisterUserApiView,
-    UserListApiView,
-    UserDetailApiView,
-    UserUpdateApiView,
-    UserDeleteApiView,
-    CustomTokenObtainPairView
-)
 
+from apps.users.views import (
+    CustomTokenObtainPairView,
+    RegisterUserApiView,
+    UserDeleteApiView,
+    UserDetailApiView,
+    UserListApiView,
+    UserUpdateApiView,
+)
 
 
 @pytest.mark.django_db

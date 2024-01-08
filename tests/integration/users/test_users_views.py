@@ -1,8 +1,8 @@
 import pytest
-from apps.users.models import CustomUser
-from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
+from rest_framework.test import APIClient
 
+from apps.users.models import CustomUser
 
 
 @pytest.mark.django_db
@@ -16,7 +16,7 @@ def test_create_user_view():
         "last_name": "user",
         "password": "notreal01",
         "phone_no": "74536483538",
-        "country": "nigeria"
+        "country": "nigeria",
     }
     url = reverse("create_user")
     response = api_client.post(url, data=payload)
@@ -36,14 +36,14 @@ def test_create_user_no_email_view():
         "last_name": "user",
         "password": "notreal01",
         "phone_no": "74536483538",
-        "country": "nigeria"
+        "country": "nigeria",
     }
     url = reverse("create_user")
     response = api_client.post(url, data=payload, format="json")
     assert response.status_code == 400
     assert len(CustomUser.objects.all()) == 0
     print("RESPONSE ERROR = ", response.json()["email"])
-    assert response.json()["email"] == ['This field is required.']
+    assert response.json()["email"] == ["This field is required."]
 
 
 @pytest.mark.django_db
@@ -57,7 +57,7 @@ def test_create_user_short_password_view():
         "last_name": "user",
         "password": "notreal",
         "phone_no": "74536483538",
-        "country": "nigeria"
+        "country": "nigeria",
     }
     url = reverse("create_user")
     response = api_client.post(url, data=payload)
@@ -69,10 +69,7 @@ def test_create_user_short_password_view():
 @pytest.fixture(scope="function")
 def authenticated_user(superuser):
     api_client = APIClient()
-    payload = {
-        "email": superuser.email,
-        "password": superuser.password
-    }
+    payload = {"email": superuser.email, "password": superuser.password}
     url = reverse("create_user")
     response = api_client.post(url, data=payload)
     assert response.status_code == 200
@@ -82,7 +79,9 @@ def authenticated_user(superuser):
 
 
 @pytest.mark.django_db
-def test_superuser_can_view_users_list_view(regularuser, superuser, authenticated_superuser):
+def test_superuser_can_view_users_list_view(
+    regularuser, superuser, authenticated_superuser
+):
     url = reverse("user_list")
     response = authenticated_superuser.get(url)
     assert response.status_code == 200
@@ -90,16 +89,22 @@ def test_superuser_can_view_users_list_view(regularuser, superuser, authenticate
 
 
 @pytest.mark.django_db
-def test_regularuser_cannot_view_users_list_view(regularuser, superuser, authenticated_regularuser):
+def test_regularuser_cannot_view_users_list_view(
+    regularuser, superuser, authenticated_regularuser
+):
     url = reverse("user_list")
     response = authenticated_regularuser.get(url)
     assert response.status_code == 403
     assert len(CustomUser.objects.all()) == 2
-    assert response.data["detail"] == "You do not have permission to perform this action."
+    assert (
+        response.data["detail"] == "You do not have permission to perform this action."
+    )
 
 
 @pytest.mark.django_db
-def test_superuser_can_view_all_users_details_view(regularuser, superuser, authenticated_superuser):
+def test_superuser_can_view_all_users_details_view(
+    regularuser, superuser, authenticated_superuser
+):
     url = reverse("user_detail", kwargs={"user_id": regularuser.id})
     response = authenticated_superuser.get(url)
     assert response.status_code == 200
@@ -107,16 +112,22 @@ def test_superuser_can_view_all_users_details_view(regularuser, superuser, authe
 
 
 @pytest.mark.django_db
-def test_regularuser_cannnot_view_other_users_details_view(regularuser, superuser, authenticated_superuser, authenticated_regularuser):
+def test_regularuser_cannnot_view_other_users_details_view(
+    regularuser, superuser, authenticated_superuser, authenticated_regularuser
+):
     url = reverse("user_detail", kwargs={"user_id": superuser.id})
     response = authenticated_regularuser.get(url)
     assert response.status_code == 403
     assert len(CustomUser.objects.all()) == 2
-    assert response.data["detail"] == "You do not have permission to perform this action."
+    assert (
+        response.data["detail"] == "You do not have permission to perform this action."
+    )
 
 
 @pytest.mark.django_db
-def test_regularuser_detail_view(regularuser, superuser, authenticated_superuser, authenticated_regularuser):
+def test_regularuser_detail_view(
+    regularuser, superuser, authenticated_superuser, authenticated_regularuser
+):
     url = reverse("user_detail", kwargs={"user_id": regularuser.id})
     response = authenticated_regularuser.get(url)
     assert response.status_code == 200
@@ -127,7 +138,9 @@ def test_regularuser_detail_view(regularuser, superuser, authenticated_superuser
 
 
 @pytest.mark.django_db
-def test_superuser_can_update_all_users_detail_view(regularuser, superuser, authenticated_superuser):
+def test_superuser_can_update_all_users_detail_view(
+    regularuser, superuser, authenticated_superuser
+):
     assert len(CustomUser.objects.all()) == 2
     payload = {
         "email": "testuser2@gmail.com",
@@ -144,7 +157,7 @@ def test_superuser_can_update_all_users_detail_view(regularuser, superuser, auth
         "country": "nigeria",
         "is_active": True,
         "is_staff": True,
-        "is_superuser": False
+        "is_superuser": False,
     }
     url = reverse("update_user", kwargs={"user_id": regularuser.id})
     response = authenticated_superuser.put(url, data=payload)
@@ -156,7 +169,9 @@ def test_superuser_can_update_all_users_detail_view(regularuser, superuser, auth
 
 
 @pytest.mark.django_db
-def test_regularuser_cannot_update_other_users_detail_view(regularuser, superuser, authenticated_regularuser):
+def test_regularuser_cannot_update_other_users_detail_view(
+    regularuser, superuser, authenticated_regularuser
+):
     assert len(CustomUser.objects.all()) == 2
     payload = {
         "email": "superuser@gmail.com",
@@ -173,17 +188,21 @@ def test_regularuser_cannot_update_other_users_detail_view(regularuser, superuse
         "country": "nigeria",
         "is_active": True,
         "is_staff": True,
-        "is_superuser": True
+        "is_superuser": True,
     }
     url = reverse("update_user", kwargs={"user_id": superuser.id})
     response = authenticated_regularuser.put(url, data=payload)
     assert response.status_code == 403
     assert len(CustomUser.objects.all()) == 2
-    assert response.data["detail"] == "You do not have permission to perform this action."
+    assert (
+        response.data["detail"] == "You do not have permission to perform this action."
+    )
 
 
 @pytest.mark.django_db
-def test_regularuser_cannot_update_view(regularuser, superuser, authenticated_regularuser):
+def test_regularuser_cannot_update_view(
+    regularuser, superuser, authenticated_regularuser
+):
     payload = {
         "email": "testuser@gmail.com",
         "username": "testuser",
@@ -200,17 +219,21 @@ def test_regularuser_cannot_update_view(regularuser, superuser, authenticated_re
         "country": "nigeria",
         "is_active": True,
         "is_staff": False,
-        "is_superuser": False
+        "is_superuser": False,
     }
     url = reverse("update_user", kwargs={"user_id": regularuser.id})
     response = authenticated_regularuser.put(url, data=payload)
     assert response.status_code == 403
     assert len(CustomUser.objects.all()) == 2
-    assert response.data["detail"] == "You do not have permission to perform this action."
+    assert (
+        response.data["detail"] == "You do not have permission to perform this action."
+    )
 
 
 @pytest.mark.django_db
-def test_superuser_can_delete_users_view(regularuser, superuser, authenticated_superuser, authenticated_regularuser):
+def test_superuser_can_delete_users_view(
+    regularuser, superuser, authenticated_superuser, authenticated_regularuser
+):
     assert len(CustomUser.objects.all()) == 2
     url = reverse("delete_user", kwargs={"user_id": regularuser.id})
     response = authenticated_superuser.delete(url)
@@ -219,20 +242,28 @@ def test_superuser_can_delete_users_view(regularuser, superuser, authenticated_s
 
 
 @pytest.mark.django_db
-def test_regularuser_cannot_delete_other_users_view(regularuser, superuser, authenticated_superuser, authenticated_regularuser):
+def test_regularuser_cannot_delete_other_users_view(
+    regularuser, superuser, authenticated_superuser, authenticated_regularuser
+):
     assert len(CustomUser.objects.all()) == 2
     url = reverse("delete_user", kwargs={"user_id": superuser.id})
     response = authenticated_regularuser.delete(url)
     assert response.status_code == 403
     assert len(CustomUser.objects.all()) == 2
-    assert response.data["detail"] == "You do not have permission to perform this action."
+    assert (
+        response.data["detail"] == "You do not have permission to perform this action."
+    )
 
 
 @pytest.mark.django_db
-def test_regularuser_cannot_delete_own_account_view(regularuser, superuser, authenticated_superuser, authenticated_regularuser):
+def test_regularuser_cannot_delete_own_account_view(
+    regularuser, superuser, authenticated_superuser, authenticated_regularuser
+):
     assert len(CustomUser.objects.all()) == 2
     url = reverse("delete_user", kwargs={"user_id": regularuser.id})
     response = authenticated_regularuser.delete(url)
     assert response.status_code == 403
     assert len(CustomUser.objects.all()) == 2
-    assert response.data["detail"] == "You do not have permission to perform this action."
+    assert (
+        response.data["detail"] == "You do not have permission to perform this action."
+    )

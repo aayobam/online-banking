@@ -1,0 +1,139 @@
+name: Continuous Integration and Delivery.
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  # build:
+  #   name: Setting up project.
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v2
+
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: 3.10.4
+
+  #     - name: Adding environment variables to .env
+  #       run: |
+  #         echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+  #         echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> .env
+  #         echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
+  #         echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> .env
+  #         echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
+  #         echo "DATABASE_PORT=${{ secrets.DATABASE_PORT }}" >> .env
+  #         echo "EMAIL_BACKEND=${{ secrets.EMAIL_BACKEND }}" >> .env
+  #         echo "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" >> .env
+  #         echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> .env
+  #         echo "DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}" >> .env
+  #         echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
+  #         echo "CONTACT_EMAIL=${{ secrets.CONTACT_EMAIL }}" >> .env
+  #         echo "EMAIL_PORT=${{ secrets.EMAIL_PORT }}" >> .env
+  #         echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> .env
+  #         echo "CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}" >> .env
+  #         echo "CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}" >> .env
+  #         echo "ALLOW_EMPTY_PASSWORD=${{ secrets.ALLOW_EMPTY_PASSWORD }}" >> .env
+  #         echo "FLOWER_BASIC_AUTH=${{ secrets.FLOWER_BASIC_AUTH }}" >> .env
+  #         echo "live_secret_key=${{ secrets.LIVE_SECRET_KEY }}" >> .env
+  #         echo "live_public_key=${{ secrets.LIVE_PUBLIC_KEY }}" >> .env
+  #         echo "test_secret_key=${{ secrets.TEST_SECRET_KEY }}" >> .env
+  #         echo "test_public_key=${{ secrets.TEST_PUBLIC_KEY }}" >> .env
+  #         echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> .env
+  #         echo "CLOUDINARY_CLOUD_NAMEe=${{ secrets.CLOUDINARY_NAME }}" >> .env
+  #         echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
+  #         echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
+  #         echo "CLOUDINARY_URL=${{ secrets.CLOUDINARY_URL }}" >> .env
+  #         echo "AWS_S3_REGION_NAME=${{ secrets.AWS_S3_REGION_NAME }}" >> .env
+  #         echo "AW_ACCESS_KEY_ID=${{ secrets.AW_ACCESS_KEY_ID }}" >> .env
+  #         echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+  #         echo "AWS_STORAGE_BUCKET_NAME=${{ secrets.AWS_STORAGE_BUCKET_NAME }}" >> .env
+  #         echo "AWS_S3_ENDPOINT_URL=${{ secrets.AWS_S3_ENDPOINT_URL }}" >> .env
+
+  #     - name: Building images.
+  #       run: |
+  #         docker compose -f docker-compose-prod.yml build
+
+  deploy:
+    name: Deploy to DigitalOcean
+    runs-on: ubuntu-latest
+    #needs: build
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.4
+
+      - name: Add environment variables to .env
+        run: |
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+          echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> .env
+          echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
+          echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> .env
+          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
+          echo "DATABASE_PORT=${{ secrets.DATABASE_PORT }}" >> .env
+          echo "EMAIL_BACKEND=${{ secrets.EMAIL_BACKEND }}" >> .env
+          echo "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" >> .env
+          echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> .env
+          echo "DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}" >> .env
+          echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
+          echo "CONTACT_EMAIL=${{ secrets.CONTACT_EMAIL }}" >> .env
+          echo "EMAIL_PORT=${{ secrets.EMAIL_PORT }}" >> .env
+          echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> .env
+          echo "CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}" >> .env
+          echo "CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}" >> .env
+          echo "ALLOW_EMPTY_PASSWORD=${{ secrets.ALLOW_EMPTY_PASSWORD }}" >> .env
+          echo "FLOWER_BASIC_AUTH=${{ secrets.FLOWER_BASIC_AUTH }}" >> .env
+          echo "live_secret_key=${{ secrets.LIVE_SECRET_KEY }}" >> .env
+          echo "live_public_key=${{ secrets.LIVE_PUBLIC_KEY }}" >> .env
+          echo "test_secret_key=${{ secrets.TEST_SECRET_KEY }}" >> .env
+          echo "test_public_key=${{ secrets.TEST_PUBLIC_KEY }}" >> .env
+          echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> .env
+          echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_NAME }}" >> .env
+          echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
+          echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
+          echo "CLOUDINARY_URL=${{ secrets.CLOUDINARY_URL }}" >> .env
+          echo "AWS_S3_REGION_NAME=${{ secrets.AWS_S3_REGION_NAME }}" >> .env
+          echo "AW_ACCESS_KEY_ID=${{ secrets.AW_ACCESS_KEY_ID }}" >> .env
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+          echo "AWS_STORAGE_BUCKET_NAME=${{ secrets.AWS_STORAGE_BUCKET_NAME }}" >> .env
+          echo "AWS_S3_ENDPOINT_URL=${{ secrets.AWS_S3_ENDPOINT_URL }}" >> .env
+
+      - name: Add the private SSH key to the ssh-agent
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          mkdir -p ~/.ssh
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          if ! ssh-add - <<< "${{ secrets.PRIVATE_KEY }}"; then
+            echo "Failed to add SSH key to ssh-agent"
+            exit 1
+          fi
+
+      - name: Copying project and deploying to Digital Ocean server...
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+
+        run: |
+          scp  -o StrictHostKeyChecking=no -r ./.env root@${{ secrets.DROPLET_IP_ADDRESS }}:/mog_dynamics
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP_ADDRESS }} << 'ENDSSH'
+            cd /mog_dynamics
+            git stash
+            git pull -f
+            source .env
+            docker system prune --force
+            docker compose -f docker-compose-prod.yml up --build -d
+            echo "Successfully deployed app."
+          ENDSSH

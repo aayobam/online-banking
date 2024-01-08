@@ -1,0 +1,62 @@
+version: '3.9'
+
+services:
+  app: &app
+    build:
+      context: .
+      dockerfile: ./docker/production/Dockerfile
+    image: mogdynamics-image
+    command:
+      [
+        "gunicorn",
+        "--bind",
+        ":8001",
+        "--workers",
+        "3",
+        "core.wsgi:application"
+      ]
+    env_file:
+      - ./.env
+    volumes:
+      - ./:/mogdynamics-app-volume
+    depends_on:
+      - redis
+    ports:
+      - "8001:8001"
+
+  redis:
+    image: bitnami/redis:latest
+    env_file:
+      - ./.env
+    ports:
+      - "6380:6379"
+    restart: always
+
+  celery:
+    <<: *app
+    command: celery -A core worker -E --loglevel=INFO --concurrency=2 --logfile=logs/celery.log
+    ports: []
+    volumes:
+      - ./:/celery-volume
+    env_file:
+      - ./.env
+    depends_on:
+      - redis
+      - app
+    restart: always
+
+  dashboard:
+    <<: *app
+    command: celery --broker=${REDIS_URL} flower --port=5555 --persistent=True --db=flower
+    ports:
+      - "5555:5555"
+    env_file:
+      - ./.env
+    depends_on:
+      - app
+      - redis
+      - celery
+    restart: always
+volumes:
+  mogdynamics-volume: ~
+  redis-data-volume: ~

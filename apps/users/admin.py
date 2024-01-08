@@ -1,7 +1,9 @@
-from .models import CustomUser
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+
 from apps.users.forms import CustomUserChangeForm, CustomUserCreationForm
+
+from .models import CustomUser
 
 
 @admin.register(CustomUser)
@@ -16,7 +18,7 @@ class CustomUserAdmin(UserAdmin):
                     "first_name",
                     "last_name",
                     "email",
-                    "username",
+                    "gender"
                     "phone_no",
                     "birth_date",
                     "age",
@@ -26,7 +28,6 @@ class CustomUserAdmin(UserAdmin):
                     "address",
                     "city",
                     "state",
-                    "zipcode",
                     "country",
                     "profile_picture",
                     "is_active",
@@ -35,7 +36,7 @@ class CustomUserAdmin(UserAdmin):
                     "user_permissions",
                     "date_joined",
                     "date_created",
-                    "date_updated"
+                    "date_updated",
                 ),
             },
         ),
@@ -51,7 +52,7 @@ class CustomUserAdmin(UserAdmin):
                     "first_name",
                     "last_name",
                     "email",
-                    "username",
+                    "gender",
                     "phone_no",
                     "birth_date",
                     "age",
@@ -59,7 +60,6 @@ class CustomUserAdmin(UserAdmin):
                     "address",
                     "city",
                     "state",
-                    "zipcode",
                     "country",
                     "profile_picture",
                     "is_active",
@@ -69,11 +69,21 @@ class CustomUserAdmin(UserAdmin):
                     "user_permissions",
                     "date_joined",
                     "date_created",
-                    "date_updated"
+                    "date_updated",
                 ),
             },
         ),
     )
-    
-    list_display = ("id", 'username', 'email', 'first_name', 'last_name', 'birth_date', 'age',  'is_active', 'is_superuser')
-    readonly_fields = ("id", 'date_joined', 'date_created', 'date_updated')
+
+    list_display = (
+        "email",
+        "first_name",
+        "last_name",
+        "gender",
+        "birth_date",
+        "age",
+        "is_active",
+        "is_staff",
+        "is_superuser",
+    )
+    readonly_fields = ("id", "age", "date_joined", "date_created", "date_updated")

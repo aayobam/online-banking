@@ -1,9 +1,8 @@
 import pytest
-from apps.users.models import CustomUser
 from rest_framework.test import APIClient
-from apps.users.serializers import UserRegisterationSerializer, UserSerializer
 
-
+from apps.users.models import CustomUser
+from apps.users.serializers import UserRegisterationSerializer
 
 api_client = APIClient()
 
@@ -21,7 +20,7 @@ def test_create_superuser_serializer():
         "country": "nigeria",
         "is_active": True,
         "is_staff": True,
-        "is_superuser": True
+        "is_superuser": True,
     }
     serializer = UserRegisterationSerializer(data=payload)
     assert serializer.is_valid()
@@ -40,7 +39,7 @@ def test_create_regularuser_serializer():
         "last_name": "user",
         "password": "notreal01",
         "phone_no": "74536483538",
-        "country": "nigeria"
+        "country": "nigeria",
     }
     serializer = UserRegisterationSerializer(data=payload)
     assert serializer.is_valid()
@@ -65,7 +64,7 @@ def test_create_user_no_email_serializer():
         "country": "nigeria",
         "is_active": True,
         "is_staff": False,
-        "is_superuser": False  
+        "is_superuser": False,
     }
     serializer = UserRegisterationSerializer(data=payload)
     assert not serializer.is_valid()
