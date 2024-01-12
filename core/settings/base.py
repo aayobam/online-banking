@@ -55,6 +55,7 @@ LOCAL_APPS = [
 
 # Third part apps
 THIRD_PARTY_APPS = [
+    'drf_yasg',
     'crispy_forms',
     'corsheaders',
     'rest_framework',
@@ -152,9 +153,16 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
+
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.AllowAny",
     ],
+
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 12,
 }

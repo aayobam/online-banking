@@ -2,6 +2,7 @@ from rest_framework import serializers
 from apps.users.models import CustomUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
+from rest_framework.exceptions import ValidationError
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -96,3 +97,24 @@ class CustomTokenObtainPairSerializer(EmailTokenObtainSerializer):
         user = UserSerializer(self.user)
         data["user"] = user.data
         return data
+
+
+class PasswordResetSerializer(serializers.ModelSerializer):
+
+    password = serializers.CharField(min_length=8, required=True)
+    confirm_password = serializers.CharField(min_length=8, required=True)
+
+    class meta:
+        fields = '__all__'
+
+
+class SetPasswordSerializer(serializers.ModelSerializer):
+    
+    email = serializers.EmailField(min_length=8, required=True)
+
+    def validate_password(self, validated_data):
+        password = validated_data.get("password", None)
+        confirm_password = validated_data.pop("confirm_password", None)
+        if password != confirm_password:
+            raise ValidationError("Passwords do not match, please try again.")
+        return password
