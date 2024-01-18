@@ -6,12 +6,12 @@ services:
     build:
       context: .
       dockerfile: ./docker/develop/Dockerfile
-    image: mogdynamics-image
+    image: swiftbank-image
     command: python manage.py runserver 0.0.0.0:8001
     env_file:
       - ./.env
     volumes:
-      - ./:/mogdynamics-app-volume
+      - ./:/swiftbank-app-volume
     depends_on:
       - redis
     ports:
@@ -63,5 +63,5 @@ services:
     #     - redis
     #     - celery
     # volumes:
-    #   mogdynamics-volume: ~
+    #   swiftbank-volume: ~
     #   redis-data-volume: ~

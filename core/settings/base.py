@@ -44,13 +44,13 @@ INSTALLED_APPS = [
 
 # local apps
 LOCAL_APPS = [
-    'apps.accounts',
-    'apps.authotps',
-    'apps.cards',
-    'apps.loans',
-    'apps.transactionotps',
-    'apps.transactions',
-    'apps.users'
+    'apis.accounts',
+    'apis.authotps',
+    'apis.cards',
+    'apis.loans',
+    'apis.transactionotps',
+    'apis.transactions',
+    'apis.users',
 ]
 
 # Third part apps
@@ -155,7 +155,7 @@ REST_FRAMEWORK = {
     ],
 
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",
+        "rest_framework.permissions.IsAuthenticated",
     ],
 
     'DEFAULT_RENDERER_CLASSES': [
@@ -195,9 +195,11 @@ SIMPLE_JWT = {
 }
 
 SWAGGER_SETTINGS = {
+
     "USE_SESSION_AUTH": False,
+
     "SECURITY_DEFINITIONS": {
-        "Authorization Token e.g [Bearer (JWT) ]": {
+        "Authorization": {
             "type": "apiKey",
             "name": "Authorization",
             "in": "header",

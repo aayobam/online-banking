@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/production/Dockerfile
-    image: mogdynamics-image
+    image: swiftbank-image
     command:
       [
         "gunicorn",
@@ -18,7 +18,7 @@ services:
     env_file:
       - ./.env
     volumes:
-      - ./:/mogdynamics-app-volume
+      - ./:/swiftbank-app-volume
     depends_on:
       - redis
     ports:
@@ -58,5 +58,5 @@ services:
       - celery
     restart: always
 volumes:
-  mogdynamics-volume: ~
+  swiftbank-volume: ~
   redis-data-volume: ~

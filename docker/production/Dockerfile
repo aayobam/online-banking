@@ -9,7 +9,7 @@ RUN apt-get update \
     && apt-get install -y gcc python3-dev libpq-dev build-essential libmariadbclient-dev
 
 # Set the working directory
-WORKDIR /mogdynamics
+WORKDIR /swiftbank
 
 # Install dependencies
 COPY ./requirements ./requirements
