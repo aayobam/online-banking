@@ -6,10 +6,10 @@ from . import views
 
 router = DefaultRouter()
 
-router.register('users', views.UserViewSet, basename="users")
+router.register('', views.UserViewSet, basename="users")
 
 urlpatterns = [
-    path('token/refresh/', TokenRefreshView.as_view(), name="token_refresh"),
-    path('auth/', views.CustomTokenObtainPairView.as_view(), name="access_token"),
+    path('token/refresh', TokenRefreshView.as_view(), name="token_refresh"),
+    path('auth', views.CustomTokenObtainPairView.as_view(), name="access_token"),
     path('', include(router.urls))
 ]

@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 import environ
+import cloudinary
 from django.utils.timezone import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -56,6 +57,7 @@ LOCAL_APPS = [
 # Third part apps
 THIRD_PARTY_APPS = [
     'drf_yasg',
+    'cloudinary',
     'crispy_forms',
     'corsheaders',
     'rest_framework',
@@ -67,18 +69,26 @@ INSTALLED_APPS += LOCAL_APPS + THIRD_PARTY_APPS
 
 # for crispy form package
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
+# Otp encryption and decryption key.
+OTP_SECRET_KEY = env("OTP_SECRET_KEY")
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',
+    'http://localhost:8000',
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -151,15 +161,16 @@ DATABASES = {
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        # "rest_framework.authentication.SessionAuthentication",
     ],
 
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.AllowAny",
     ],
 
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
+        # 'rest_framework.renderers.TemplateHtmlRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
 
@@ -223,25 +234,24 @@ CACHES = {
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 # CLOUDINARY CONFIGURATION.
-# CLOUDINARY_STORAGE = {
-#     "CLOUD_NAME": env("CLOUDINARY_CLOUD_NAME"),
-#     "API_KEY": env("CLOUDINARY_API_KEY"),
-#     "API_SECRET": env("CLOUDINARY_API_SECRET"),
-#     'SECURE': True,
-#     'STATICFILES_MANIFEST_ROOT': os.path.join(BASE_DIR, 'static'),
-#     'STATIC_IMAGES_EXTENSIONS': ['jpg', 'jpe', 'jpeg', 'jpc', 'jp2', 'j2k', 'wdp', 'jxr', 'hdp', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff', 'ico']
-# }
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": env("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": env("CLOUDINARY_API_KEY"),
+    "API_SECRET": env("CLOUDINARY_API_SECRET"),
+    'SECURE': True,
+    'STATICFILES_MANIFEST_ROOT': os.path.join(BASE_DIR, 'static'),
+    'STATIC_IMAGES_EXTENSIONS': ['jpg', 'jpe', 'jpeg', 'jpc', 'jp2', 'j2k', 'wdp', 'jxr', 'hdp', 'png', 'gif', 'webp', 'bmp', 'tif', 'tiff', 'ico']
+}
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [BASE_DIR / 'static',]
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-
-# STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
-# DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Redis configuration.
 REDIS_URL = env("REDIS_URL")

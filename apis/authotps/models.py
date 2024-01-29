@@ -13,3 +13,6 @@ class AuthOtp(TimeStampedModel):
     class Meta:
         verbose_name = "AuthOtp"
         verbose_name_plural = "AuthOtps"
+
+    def __str__(self):
+        return self.otp

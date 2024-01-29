@@ -1,67 +1,54 @@
-from rest_framework import generics, status
+from django.shortcuts import get_object_or_404
+from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
 from apis.accounts.models import Account
 from apis.common import permission_helper
 from apis.accounts.serializers import AccountSerializer, VerifyAccountSerializer
 
 
-class GetAccountNumberApiView(generics.CreateAPIView):
+class AccountViewSet(viewsets.ModelViewSet):
     queryset = Account.objects.all()
-    serializer_class = VerifyAccountSerializer
+    serializer_class = AccountSerializer
+    lookup_url_kwarg = "account_id"
     permission_classes = [permission_helper.IsOwnerOrReadOnly]
 
-    def post(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         user = request.user
-        serializer = self.serializer_class(data=request.data)
+        serializer_class = VerifyAccountSerializer
+        serializer = serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(owner=user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def list(self, request, *args, **kwargs):
+        serializer_class = AccountSerializer
+        payload = self.queryset.order_by("-created_date")
+        page = self.paginate_queryset(payload)
+        if page is not None:
+            serializers = serializer_class(data=page, many=True)
+            return self.get_paginated_response(serializers.data)
+        serializers = serializer_class(data=payload)
+        return Response(serializers.data, status=status.HTTP_200_OK)
 
-class AccountListApiView(generics.ListAPIView):
-    queryset = Account.objects.all()
-    serializer_class = AccountSerializer
+    def retrieve(self, request, *args, **kwargs):
+        serializer_class = AccountSerializer
+        payload = get_object_or_404(self.queryset, id=kwargs.get("account_id"))
+        serializers = serializer_class(data=payload)
+        return Response(serializers.data, status=status.HTTP_200_OK)
 
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        return Response(response.data, status=status.HTTP_200_OK)
+    def update(self, request, *args, **kwargs):
+        payload = get_object_or_404(self.queryset, kwargs.get("account_id"))
+        serializer = AccountSerializer(data=request.data, instance=payload)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def partial_update(self, request, *args, **kwargs):
+        payload = get_object_or_404(self.queryset, kwargs.get("account_id"))
+        serializer = AccountSerializer(data=request.data, instance=payload)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class AccountDetailApiView(generics.RetrieveAPIView):
-    queryset = Account.objects.all()
-    serializer_class = AccountSerializer
-    lookup_url_kwarg = "account_id"
-    lookup_field = "id"
-
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-
-        if response.data["verification_status"] == "pending":
-            return Response("Your account is still pending verification.")
-
-        if response.data["verification_status"] == "failed":
-            return Response("Your account verification has failed.Retry again.")
-
-        return Response(response.data, status=status.HTTP_200_OK)
-
-
-class AccountUpdateApiView(generics.RetrieveUpdateAPIView):
-    queryset = Account.objects.all()
-    serializer_class = AccountSerializer
-    lookup_url_kwarg = "account_id"
-    lookup_field = "id"
-
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        return Response(response.data, status=status.HTTP_200_OK)
-
-    def put(self, request, *args, **kwargs):
-        response = super().patch(request, *args, **kwargs)
-        return Response(response.data, status=status.HTTP_200_OK)
-
-
-class DeleteAccountApiView(generics.DestroyAPIView):
-    queryset = Account.objects.all()
-    serializer_class = AccountSerializer
-    lookup_url_kwargs = "account_id"
-    lookup_field = "id"
+    def destroy(self, request, *args, **kwargs):
+        payload = get_object_or_404(self.queryset, kwargs.get("account_id"))
+        payload.delete()
+        return Response({"message": f"account record with account no: {payload.account_no} deleted."}, status=status.HTTP_200_OK)

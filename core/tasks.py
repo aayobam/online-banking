@@ -1,10 +1,10 @@
 from celery import shared_task
-from apps.common import mail_helper
+from apis.common import mailing_helper
 
 
 @shared_task
-def send_contact_mail_task(subject, message, sender_email, receiver_email, reply_to):
-    contact_us = mail_helper.SendEmailClass(
+def send_verification_otp_mail_task(subject, message, sender_email, receiver_email, reply_to):
+    contact_us = mailing_helper.SendEmailClass(
         email_subject=subject,
         email_body=message,
         receiver_email=receiver_email,
@@ -12,71 +12,71 @@ def send_contact_mail_task(subject, message, sender_email, receiver_email, reply
         reply_to=reply_to
     )
     try:
-        contact_us.contact_us_mail()
+        contact_us.account_verification_mail()
     except Exception as e:
-        print('{0}: Could not send contact mail'.format(e))
-    return "Contact mail sent successfully"
+        print('{0}: Could not send account activation otp.'.format(e))
+    return "Mail activation otp sent successfully."
 
 
 @shared_task
-def send_order_booking_email_task(subject, message, receiver_email, from_email, reply_to):
-    order_booking = mail_helper.SendEmailClass(
+def send_verification_status_mail_task(subject, message, sender_email, receiver_email, reply_to):
+    contact_us = mailing_helper.SendEmailClass(
         email_subject=subject,
         email_body=message,
-        sender_email=from_email,
         receiver_email=receiver_email,
+        sender_email=sender_email,
         reply_to=reply_to
     )
     try:
-        order_booking.order_booking_mail()
+        contact_us.account_verification_mail()
     except Exception as e:
-        print('{0}: Could not send order booking mail'.format(e))
-    return "Online booking mail sent successfully."
+        print('{0}: Could not send account verification status mail.'.format(e))
+    return "Mail verification status sent."
 
 
 @shared_task
-def send_password_reset_task(subject, message, sender_email, receiver_email):
-    password_reset = mail_helper.SendEmailClass(
-        email_subject=subject,
-        email_body=message,
-        receiver_email=receiver_email,
-        sender_email=sender_email
-    )
-    try:
-        password_reset.password_reset_mail()
-    except Exception as e:
-        print("{0}: Could not send mail.".format(e))
-    return "Password reset email sent."
-
-
-@shared_task
-def send_export_mail_task(subject, message, sender_email, receiver_email):
-    send_export_mail = mail_helper.SendEmailClass(
+def send_transaction_mail_task(subject, message, sender_email, receiver_email, reply_to):
+    send_export_mail = mailing_helper.SendEmailClass(
         email_subject=subject,
         email_body=message,
         receiver_email=receiver_email,
         sender_email=sender_email,
-        reply_to=None
+        reply_to=reply_to
     )
     try:
-        send_export_mail.export_mail()
+        send_export_mail.transaction_mail()
     except Exception as e:
-        print("{0}: Could not send mail.".format(e))
-    return "Export email sent."
+        print('{0}: Could not send account verification status mail.'.format(e))
+    return "Account verification status mail sent."
 
 
 @shared_task
-def send_import_mail_task(subject, message, sender_email, receiver_email):
-    send_export_mail = mail_helper.SendEmailClass(
+def send_password_reset_token_task(subject, message, sender_email, receiver_email, reply_to):
+    password_reset = mailing_helper.SendEmailClass(
         email_subject=subject,
         email_body=message,
         receiver_email=receiver_email,
         sender_email=sender_email,
-        reply_to=None
+        reply_to=reply_to
     )
     try:
-        send_export_mail.import_mail()
+        password_reset.password_reset_token_mail()
     except Exception as e:
-        print("{0}: Could not send mail.".format(e))
-    return "Export email sent."
+        print("{0}: Could not send password reset otp mail.".format(e))
+    return "Password reset otp email sent."
 
+
+@shared_task
+def send_password_reset_complete_task(subject, message, sender_email, receiver_email, reply_to):
+    password_reset = mailing_helper.SendEmailClass(
+        email_subject=subject,
+        email_body=message,
+        receiver_email=receiver_email,
+        sender_email=sender_email,
+        reply_to=reply_to
+    )
+    try:
+        password_reset.password_reset_complete_mail()
+    except Exception as e:
+        print("{0}: Could not send password reset complete mail.".format(e))
+    return "Password reset complete mail sent."

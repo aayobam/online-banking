@@ -1,9 +1,10 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from cloudinary.models import CloudinaryField
 from django.urls import reverse
 
 from apis.common import choices
-from apis.common.custom_validator import verify_date_of_birth
+from apis.common.custom_validator import file_validator, verify_date_of_birth
 from apis.common.models import TimeStampedModel
 from apis.users.managers import CustomUserManager
 
@@ -20,13 +21,15 @@ class CustomUser(AbstractUser, TimeStampedModel):
     address = models.CharField(max_length=255)
     city = models.CharField(max_length=50)
     state = models.CharField(max_length=50)
-    country = models.CharField(default="nigeria", choices=choices.COUNTRY, max_length=100)
-    profile_picture = models.ImageField(upload_to="profile_images", blank=True, null=True)
+    country = models.CharField(
+        default="nigeria", choices=choices.COUNTRY, max_length=100)
+    profile_picture = CloudinaryField(
+        "profile_images", validators=[file_validator], blank=True, null=True)
 
     objects = CustomUserManager()
     USERNAME_FIELD = "email"
     EMAIL_FIELD = "email"
-    REQUIRED_FIELDS = ['first_name','last_name']
+    REQUIRED_FIELDS = ['first_name', 'last_name']
 
     class Meta:
         ordering = ("-date_created",)
@@ -38,7 +41,14 @@ class CustomUser(AbstractUser, TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse("user_detail", kwargs={"user_id": self.id})
-    
+
+    def __unicode__(self):
+        try:
+            public_id = self.profile_picture.public_id
+        except AttributeError:
+            public_id = ''
+        return "Photo <%s:%s>" % (self.title, public_id)
+
     def save(self, *args, **kwargs):
         self.age = verify_date_of_birth(self.birth_date)
         return super().save(*args, **kwargs)
