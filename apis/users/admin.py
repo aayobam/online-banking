@@ -1,8 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-
 from apis.users.forms import CustomUserChangeForm, CustomUserCreationForm
-
 from .models import CustomUser
 
 
@@ -20,7 +18,7 @@ class CustomUserAdmin(UserAdmin):
                     "email",
                     "gender"
                     "phone_no",
-                    "birth_date",
+                    "date_of_birth",
                     "age",
                     "password1",
                     "password2",
@@ -55,7 +53,7 @@ class CustomUserAdmin(UserAdmin):
                     "email",
                     "gender",
                     "phone_no",
-                    "birth_date",
+                    "date_of_birth",
                     "age",
                     "role",
                     "address",
@@ -82,7 +80,7 @@ class CustomUserAdmin(UserAdmin):
         "first_name",
         "last_name",
         "gender",
-        "birth_date",
+        "date_of_birth",
         "age",
         "is_active",
         "is_staff",

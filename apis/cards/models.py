@@ -1,10 +1,9 @@
 from django.core.exceptions import ValidationError
 from django.db import models
-
 from apis.accounts.models import Account
 from apis.cards import generate_card
 from apis.common.choices import CARD_TYPES
-from apis.common.models import TimeStampedModel
+from apis.common.models import BaseModel
 
 
 def validate_card_number(value):
@@ -23,7 +22,7 @@ def validate_cvv(value):
     return value
 
 
-class Card(TimeStampedModel):
+class Card(BaseModel):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     card_type = models.CharField(max_length=50, choices=CARD_TYPES)
     card_number = models.CharField(max_length=16, unique=True, validators=[validate_card_number])

@@ -1,6 +1,6 @@
 from rest_framework import permissions
 import logging
-from core.settings import base
+from core import settings
 from django.core import cache
 
 
@@ -16,7 +16,7 @@ class IsIdempotent(permissions.BasePermission):
             return True
         ival = ival[:128]
         key = 'idemp-{}-{}'.format(request.user.pk, ival)
-        is_idempotent = bool(cache.add(key, 'yes', base.IDEMPOTENCY_TIMEOUT))
+        is_idempotent = bool(cache.add(key, 'yes', settings.IDEMPOTENCY_TIMEOUT))
         if not is_idempotent:
             logging.info(u'Duplicate request (non-idempotent): %s', key)
         return is_idempotent

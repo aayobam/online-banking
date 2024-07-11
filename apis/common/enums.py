@@ -60,3 +60,9 @@ TRANSACTION_OTP_DESCRIPTION = [
     ('transfer', 'Transfer'),
     ('withdrawal', 'Withdrawal')
 ]
+
+
+TOKEN_TYPE = (
+    ("PASSWORD_RESET", "PASSWORD_RESET"),
+    ("PASSWORD_CREATE", "PASSWORD_CREATE"),
+)

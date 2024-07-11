@@ -23,6 +23,6 @@ RUN chmod +x /entrypoint.sh
 # Copy the project code to the work directory.
 COPY . .
 
-ENV DJANGO_SETTINGS_MODULE=core.settings.dev
+ENV DJANGO_SETTINGS_MODULE=core.settings
 
 ENTRYPOINT ["/entrypoint.sh"]

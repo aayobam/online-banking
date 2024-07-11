@@ -1,16 +1,19 @@
 import datetime
+import secrets
 from rest_framework import serializers
+from apis.accounts.models import Account
 from apis.authotps.models import AuthOtp
-from apis.common import custom_validator
+from django.utils.translation import gettext_lazy as _
 from apis.users.models import CustomUser
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.serializers import TokenObtainSerializer
-from rest_framework.exceptions import ValidationError
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.utils import timezone
+from apis.users.utils import get_or_create_user_session_key
+from rest_framework.exceptions import AuthenticationFailed
+from django.db import transaction
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
-    # detail_url = serializers.SerializerMethodField(source="get_detail_url")
+    detail_url = serializers.SerializerMethodField(source="get_detail_url")
 
     class Meta:
         model = CustomUser
@@ -19,14 +22,15 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             "email",
             "first_name",
             "last_name",
-            "birth_date",
+            "date_of_birth",
             "age",
             "phone_no",
             "profile_picture",
+            "detail_url"
         ]
 
-    # def get_detail_url(self, obj):
-    #     return obj.get_absolute_url()
+    async def get_detail_url(self, obj):
+        return obj.get_absolute_url()
 
 
 class UserRegisterationSerializer(serializers.HyperlinkedModelSerializer):
@@ -54,49 +58,80 @@ class UserRegisterationSerializer(serializers.HyperlinkedModelSerializer):
             "email",
             "first_name",
             "last_name",
-            "birth_date",
+            "date_of_birth",
             "password",
             "confirm_password",
             "phone_no",
             "country",
             "profile_picture",
         ]
-        extra_kwargs = {
-            "password": {"write_only": True},
-            "confirm_password": {"write_only": True}
-        }
+        read_only_fields = ("id",)
+        extra_kwargs = {"password": {"write_only": True}, "confirm_password": {"write_only": True}}
 
-    def validate(self, attrs):
-        password = attrs.get("password")
-        confirm_password = attrs.pop("confirm_password")
+    async def validate(self, attrs):
+        email = attrs.get("email", None)
+        password = attrs.get("password", None)
+        confirm_password = attrs.pop("confirm_password", None)
+        date_of_birth = attrs.get("birth_date", None)
 
-        if CustomUser.objects.filter(email=attrs.get("email", None)).exists():
-            raise serializers.ValidationError(
-                "This email already exist in our database.")
-
+        if CustomUser.objects.filter(email=email).exists():
+            raise serializers.ValidationError({"message": "This email already exist in our database."})
         if password != confirm_password:
-            raise ValidationError("passwords do not match, please try again.")
-
-        age = custom_validator.verify_date_of_birth(value=attrs.get("birth_date", None))
-
+            raise serializers.ValidationError({"messages": "passwords do not match, please try again."})
+        age = self.verify_date_of_birth(value=date_of_birth)
         if age < 18:
-            raise ValidationError(
-                f"you are {age} years of age. you must be 18 years of age and above to own an account.")
-
-        user = CustomUser.objects.create_user(**attrs)
-        user.age = age
+            raise serializers.ValidationError({"message": "you are {age} years of age. you must be 18 years of age and above to own an account."})
+        if age > 1000:
+            raise serializers.ValidationError({"message": f"age cannot be more than {1000} years old"})
+        attrs["age"] = age
+        return attrs
+    
+    @transaction.atomic
+    async def create(self, validated_data):
+        password = validated_data.get("password")
+        account_type = validated_data.get("account_type")
+        user = await CustomUser.objects.create_user(**validated_data)
         user.set_password(password)
         user.save()
 
-        encryptedOtp = gene
-        otpDict = {
-            "user": user,
-            "otp": encryptedOtp,
-            "expiry": datetime.timedelta.min(10),
-            "description": "fresh account email verification."
-        }
+        account_number = await self.generate_account_no()
+        daily_transfer_limit = await self.generate_daily_transfer_limit(account_type)
+        
+        account = await Account.objects.create(
+            owner=user,
+            account_type=account_type,
+            account_no=account_number,
+            balance=0.00,
+            daily_transfer_limit=daily_transfer_limit,
+            verification_status="Verified"
+        )
+        account.save()
         return user
 
+    @staticmethod
+    async def verify_date_of_birth(date_of_birth):
+        today = datetime.date.today()
+        age = today.year - date_of_birth.year
+        if (today.month, today.day) < (date_of_birth.month, date_of_birth.day):
+            age -= 1
+        return age
+    
+    @staticmethod
+    async def generate_account_no():
+        account_no = secrets.randbelow(10**10)
+        return account_no
+    
+    @staticmethod
+    async def generate_daily_transfer_limit(account_type):
+        if account_type == "Savings":
+            return 1000000.00       
+        elif account_type == "Current":
+            return 5000000.00
+        else:
+            return 0.00
+        
+        
+    
 
 class VerifyAccountSerializer(serializers.Serializer):
     otp = serializers.CharField(required=True)
@@ -105,74 +140,56 @@ class VerifyAccountSerializer(serializers.Serializer):
     class Meta:
         fields = "__all__"
 
-    def validate(self, attrs):
+    async def validate(self, attrs):
         otp = attrs.get("otp", None)
         email = attrs.get("email", None)
-
-        otpObject = AuthOtp.objects.select_related("user").filter(otp=otp, user__email=email).first()
-        userObj = CustomUser.objects.filter(email=email).first()
-
-        if otpObject is not None:
-            if otpObject.expiry <= timezone.now() and userObj is not None:
-                userObj.is_active = True
-                userObj.save()
-
-            elif otpObject.expiry > timezone.now():
-                raise ValidationError("Otp has expired, sign in to request for a new otp.")
-        
-        raise ValidationError("Invalid otp supplied, please try again.")
+        user_otp = await AuthOtp.objects.select_related("user").filter(otp=otp, user__email=email).first()
+        if user_otp is not None:
+            user = user_otp.user
+            if user_otp.expiry <= timezone.now() and user is not None:
+                user.is_active = True
+                user.save()
+            elif user_otp.expiry > timezone.now():
+                raise serializers.ValidationError({"message": "Otp has expired, sign in to request for a new otp."})
+        raise serializers.ValidationError({"message": "Invalid otp supplied, please try again."})
 
 
-class EmailTokenObtainSerializer(TokenObtainSerializer):
-    username_field = CustomUser.EMAIL_FIELD
-
-
-class CustomTokenObtainPairSerializer(EmailTokenObtainSerializer):
-    """ "
-    Generates refresh token for users and returns new access token
-    """
+class CustomObtainTokenPairSerializer(TokenObtainPairSerializer):
+    default_error_messages = {"email": _("Invalid email or password")}
 
     @classmethod
-    def get_token(cls, user):
-        token = RefreshToken.for_user(user)
+    async def get_token(cls, user):
+        if not user.is_active:
+            raise AuthenticationFailed(_("Account not active."), code="authentication")
+        token = super().get_token(user)
+        token["user"] = UserSerializer(user).data
+        token['session_id'] = get_or_create_user_session_key(str(user.id))
+        user.save()
         return token
 
-    def validate(self, attrs):
-        data = super().validate(attrs)
-        refresh = self.get_token(self.user)
-        data["refresh"] = str(refresh)
-        data["access"] = str(refresh.access_token)
-        user = UserSerializer(self.user).data
-        data["user"] = user
-        return data
 
+class InitiatePasswordResetSerializer(serializers.Serializer):
+    """Serializer for sending password reset email to the user"""
 
-class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.CharField(required=True)
 
-    password = serializers.CharField(min_length=8, required=True)
-
-    confirm_password = serializers.CharField(min_length=8, required=True)
-
-    class Meta:
-
-        fields = ['password', 'confirm_password']
-
-        extra_kwargs = {
-            "password": {"write_only": True},
-            "confirm_password": {"write_only": True}
-        }
+    async def validate(self, attrs):
+        attrs = super().validate(attrs)
+        email = attrs.get("email", None)
+        if not await CustomUser.objects.filter(email=email).exists():
+            raise serializers.ValidationError({"message": "email supplied does not exist."})
+        return attrs
 
 
 class SetPasswordSerializer(serializers.Serializer):
+    """Serializer for password change on reset"""
 
-    email = serializers.EmailField(min_length=8, required=True)
+    token = serializers.CharField(required=True)
+    new_password = serializers.RegexField(regex=r'^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', write_only=True, error_messages={
+                                          'invalid': ('Password must be at least 8 characters long with at least one capital letter and symbol')})
+    confirm_password = serializers.CharField(write_only=True, required=True)
 
-    class Meta:
-        fields = "__all__"
 
-    def validate_password(self, validated_data):
-        password = validated_data.get("password", None)
-        confirm_password = validated_data.pop("confirm_password", None)
-        if password != confirm_password:
-            raise ValidationError("Passwords do not match, please try again.")
-        return password
+class UserLogoutSerializer(serializers.Serializer):
+    pass
+    # id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), read_only=True)

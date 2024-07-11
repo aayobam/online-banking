@@ -3,7 +3,7 @@ from datetime import date, datetime
 from django.core.files.storage import FileSystemStorage
 from django.core.files.uploadedfile import UploadedFile
 from rest_framework.exceptions import ValidationError
-from core.settings import base
+from core import settings
 
 
 def file_validator(file):
@@ -13,13 +13,13 @@ def file_validator(file):
     if not file:
         raise ValidationError("No file selected.")
 
-    if file.size > base.FILE_UPLOAD_MAX_MEMORY_SIZE:
+    if file.size > settings.FILE_UPLOAD_MAX_MEMORY_SIZE:
         raise ValidationError("File shouldn't be larger than 10MB.")
 
     if isinstance(file, UploadedFile):
-        if file.size > base.FILE_UPLOAD_MAX_MEMORY_SIZE:
+        if file.size > settings.FILE_UPLOAD_MAX_MEMORY_SIZE:
             raise ValidationError(
-                f"File shouldn't be larger than {base.FILE_UPLOAD_MAX_MEMORY_SIZE}MB.")
+                f"File shouldn't be larger than {settings.FILE_UPLOAD_MAX_MEMORY_SIZE}MB.")
 
     fs = FileSystemStorage()
     filename = fs.save(file.name, file)
